@@ -2,47 +2,88 @@
 #include <external/GLFW/glfw3.h> // GLFW helper library
 #include <stdio.h>
 #include <iostream>
-int main() {
-  // start GL context and O/S window using the GLFW helper library
-  if (!glfwInit()) {
-    fprintf(stderr, "ERROR: could not start GLFW3\n");
-    return 1;
-  } 
+#include "shaderUtil.h"
+#include "window.h"
 
-  // uncomment these lines if on Apple OS X
-  /*glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);*/
-
-  GLFWwindow* window = glfwCreateWindow(640, 480, "Hello Triangle", NULL, NULL);
-  if (!window) {
-    fprintf(stderr, "ERROR: could not open window with GLFW3\n");
-    glfwTerminate();
-    return 1;
+class RenderTri: public BaseWindow {
+private:
+ void setKeyDetails(int key, int scancode, int action, int mods);
+ void setWindowSize(GLuint width, GLuint height) {glViewport(0, 0, width, height);};
+public:
+  GLuint shader_programme;
+  GLuint vao;
+  RenderTri(GLuint width, GLuint height, const char *windowName, GLuint glVer_Maj, GLuint glVer_Min);
+  void render() {
+    while(!glfwWindowShouldClose(window)) {
+    // wipe the drawing surface clear
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glUseProgram(shader_programme);
+    glBindVertexArray(vao);
+    // draw points 0-3 from the currently bound VAO with current in-use shader
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    // update other events like input handling 
+    glfwPollEvents();
+    // put the stuff we've been drawing onto the display
+    glfwSwapBuffers(window);
+    showFps();
+    }
   }
-  glfwMakeContextCurrent(window);
-                                  
-  // start GLEW extension handler
-  glewExperimental = GL_TRUE;
-  glewInit();
+};
 
-  // get version info
-  const GLubyte* renderer = glGetString(GL_RENDERER); // get renderer string
-  const GLubyte* version = glGetString(GL_VERSION); // version as a string
-  printf("Renderer: %s\n", renderer);
-  printf("OpenGL version supported %s\n", version);
+void RenderTri:: setKeyDetails(int key, int scancode, int action, int mods)
+{
+  std::cout<<"Hi"<<std::endl;
+}
 
-  // tell GL to only draw onto a pixel if the shape is closer to the viewer
-  glEnable(GL_DEPTH_TEST); // enable depth-testing
-  glDepthFunc(GL_LESS); // depth-testing interprets a smaller value as "closer"
-
-  /* OTHER STUFF GOES HERE NEXT */
+RenderTri::RenderTri(GLuint width, GLuint height, const char *windowName, GLuint glVer_Maj, GLuint glVer_Min):BaseWindow(width, height, windowName, glVer_Maj, glVer_Min) 
+{
+    float points[] = {
+      0.0f,  0.5f,  0.0f,
+      0.5f, -0.5f,  0.0f,
+      -0.5f, -0.5f,  0.0f
+    };
   
-  // close GL context and any other GLFW resources
-  int x;
-  std::cin>>x;
-  glfwTerminate();
+    GLuint vbo = 0;
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), points, GL_STATIC_DRAW);
+  
+    vao = 0;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+  
+    char* vertex_shader = 0;
+    char* fragment_shader = 0;
+  
+    readVertexShaderSource("1.vert", &vertex_shader);
+    readFragmentShaderSource("1.frag", &fragment_shader);
+   
+    GLuint vs = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vs, 1, &vertex_shader, NULL);
+    glCompileShader(vs);
+    reportShaderErrors(vs);
+    GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fs, 1, &fragment_shader, NULL);
+    glCompileShader(fs);
+    reportShaderErrors(fs);
+  
+    shader_programme = glCreateProgram();
+    glAttachShader(shader_programme, fs);
+    glAttachShader(shader_programme, vs);
+    glLinkProgram(shader_programme);
+}
+
+int main() {
+  RenderTri w1(640, 480, "A triangle", 4, 0);
+  RenderTri w2(640, 480, "A triangle2", 4, 0);
+  w2.bindGlContext();
+   
+  
+  w2.render();
+  
   
   return 0;
 }

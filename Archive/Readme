@@ -1,0 +1,10 @@
+How to get GLFW shared lib:
+ $cmake -DBUILD_SHARED_LIBS=ON
+ $make
+ copy the src/libglfw.so.3.2 to GLRender/lib
+
+possible dependencies: libxrandr-dev libxi-dev libxinerama-dev libxcursor-dev mesa-common-dev
+
+How to get GLEW static lib:
+ $make
+ copy lib/libGLEW.a to GLRender/lib
