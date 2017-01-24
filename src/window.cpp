@@ -19,7 +19,7 @@ static void glfwKeyCb(GLFWwindow* window, int key, int scancode, int action, int
   ptr->setKeyDetails(key, scancode, action, mods);  
 }
 
-BaseWindow::BaseWindow(GLuint width, GLuint height, const char *windowTitle, GLuint glVer_Maj = 4, GLuint glVer_Min = 0) {
+BaseWindow::BaseWindow(GLuint width, GLuint height, std::string windowTitle, GLuint glVer_Maj = 4, GLuint glVer_Min = 0) {
   if (nWindows == 0)
     glfwSetErrorCallback(glfwErrorCb);
   
@@ -32,7 +32,7 @@ BaseWindow::BaseWindow(GLuint width, GLuint height, const char *windowTitle, GLu
   // uncomment these lines if on Apple OS X
   /* glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);*/
-  window = glfwCreateWindow(width, height, windowTitle, NULL, NULL);
+  window = glfwCreateWindow(width, height, windowTitle.c_str(), NULL, NULL);
   if (nWindows == 0 && !window) {
     glfwTerminate();
     pexit("ERROR: could not open window with GLFW3.");

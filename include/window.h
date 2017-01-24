@@ -20,7 +20,7 @@ protected:
   GLFWwindow* window;
   void showFps();
 public:
-  BaseWindow(GLuint width, GLuint height, const char *windowName, GLuint glVer_Maj, GLuint glVer_Min);
+  BaseWindow(GLuint width, GLuint height, std::string windowTitle, GLuint glVer_Maj, GLuint glVer_Min);
   void bindGlContext();
   ~BaseWindow();
   virtual void setKeyDetails(int key, int scancode, int action, int mods) = 0;

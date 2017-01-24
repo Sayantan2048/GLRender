@@ -9,6 +9,7 @@ class RenderTri: public BaseWindow {
 private:
  void setKeyDetails(int key, int scancode, int action, int mods);
  void setWindowSize(GLuint width, GLuint height) {glViewport(0, 0, width, height);};
+ void bind() {};
 public:
   GLuint shader_programme;
   GLuint vao;

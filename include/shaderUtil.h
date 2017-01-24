@@ -3,6 +3,7 @@
 
 void readVertexShaderSource(const char *kernelFilename, char **kernelSource);
 void readFragmentShaderSource(const char *kernelFilename, char **kernelSource);
-void pexit(const char *message);
+void pexit(std::string message);
 void reportShaderErrors(GLuint shader);
+bool reportGlError(std::string message);
 #endif

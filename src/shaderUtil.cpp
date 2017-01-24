@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include "external/GL/glew.h"
+#include "GL/glu.h"
 #include "shaderUtil.h"
 
 void reportShaderErrors(GLuint shader)
@@ -22,7 +23,7 @@ void reportShaderErrors(GLuint shader)
   }
 }
 
-void pexit(const char *message)
+void pexit(std::string message)
 {
   std::cerr<<message<<std::endl;
   exit(0);
@@ -69,9 +70,12 @@ void readFragmentShaderSource(const char *kernelFilename, char **kernelSource) {
   readSource(fullPath, kernelSource);
 }
 
-
-
-
-
-
-
+bool reportGlError(std::string message)
+{
+  GLenum errorCheckValue = glGetError();
+  if (errorCheckValue != GL_NO_ERROR) {
+    std::cerr<<message<<":"<<errorCheckValue<<std::endl;
+    return false;
+  }
+  return true;
+}
