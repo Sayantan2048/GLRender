@@ -1,10 +1,13 @@
-#include <external/GL/glew.h> // include GLEW and new version of GL on Windows
-#include <external/GLFW/glfw3.h> // GLFW helper library
+#include <external/GL/glew.h> // extension handling.
+#include <external/GLFW/glfw3.h> // window library.
+#include <external/glm/vec4.hpp> //vec4
 #include <stdio.h>
 #include <iostream>
 #include "shaderUtil.h"
 #include "window.h"
+using namespace glm;
 
+// triangle drawing example: two ways to create buffer.
 class ColorTri: public BaseWindow {
 private:
   GLuint vaoId;
@@ -17,15 +20,17 @@ private:
   
   void setKeyDetails(int key, int scancode, int action, int mods){};
   void setWindowSize(GLuint width, GLuint height) {glViewport(0, 0, width, height);};
-  void createBuffer();
-  void destroyBuffer();
+  void createBuffer1(); //Create buffer using simple data structure 
+  void createBuffer2(); //Create buffer using complex data structure
+  void destroyBuffer1();
+  void destroyBuffer2();
   void createShader();
   void destroyShader();
 public:
   ColorTri(GLuint width, GLuint height, const char *windowName, GLuint glVer_Maj, GLuint glVer_Min);
   ~ColorTri()
   { 
-    destroyBuffer();
+    destroyBuffer1();
     destroyShader();
   }
   void render() {
@@ -44,7 +49,8 @@ public:
   void bind();
 };
 
-void ColorTri::createBuffer()
+//Simple
+void ColorTri::createBuffer1()
 {
   GLfloat Vertices[] = {
     -0.8f, -0.8f, 0.0f, 1.0f,
@@ -74,10 +80,46 @@ void ColorTri::createBuffer()
   glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);// 1st input to vertex shader
   glEnableVertexAttribArray(1);
   
-  reportGlError("Failed to create buffer.");
+  reportGlError("Failed to create buffer1.");
 }
 
-void ColorTri::destroyBuffer(void)
+//Complex
+void ColorTri::createBuffer2()
+{
+  typedef struct {
+    vec4 position;
+    vec4 color;
+  } Vertex;
+  
+  Vertex Vertices[] =
+  {
+    { vec4(-0.8f, -0.8f, 0.0f, 1.0f), vec4(1.0f, 0.0f, 0.0f, 1.0f) },
+    { vec4(0.0f,  0.8f, 0.0f, 1.0f), vec4(0.0f, 1.0f, 0.0f, 1.0f) },
+    { vec4(0.8f, -0.8f, 0.0f, 1.0f), vec4(0.0f, 0.0f, 1.0f, 1.0f) }
+  };
+  
+  const size_t BufferSize = sizeof(Vertices);
+  const size_t VertexSize = sizeof(Vertices[0]);
+  const size_t RgbOffset = sizeof(Vertices[0].position);
+
+  glGenVertexArrays(1, &vaoId);
+  glBindVertexArray(vaoId);
+
+  glGenBuffers(1, &vertexBufferId);
+  
+  glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
+  glBufferData(GL_ARRAY_BUFFER, BufferSize, Vertices, GL_STATIC_DRAW);
+
+  glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, VertexSize, 0);
+  glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, VertexSize, (GLvoid*)RgbOffset);
+
+  glEnableVertexAttribArray(0);
+  glEnableVertexAttribArray(1);
+  
+  reportGlError("Failed to create buffer2.");
+}
+
+void ColorTri::destroyBuffer1(void)
 {
   glDisableVertexAttribArray(1);
   glDisableVertexAttribArray(0);
@@ -91,6 +133,21 @@ void ColorTri::destroyBuffer(void)
   glDeleteVertexArrays(1, &vaoId);
   
   reportGlError("Failed to delete buffer.");
+}
+
+void ColorTri::destroyBuffer2(void)
+{
+  glDisableVertexAttribArray(1);
+  glDisableVertexAttribArray(0);
+  
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+  glDeleteBuffers(1, &vertexBufferId);
+
+  glBindVertexArray(0);
+  glDeleteVertexArrays(1, &vaoId);
+  
+  reportGlError("Failed to delete buffer2.");
 }
 
 void ColorTri::createShader()
@@ -144,7 +201,7 @@ void ColorTri::bind()
 
 ColorTri::ColorTri(GLuint width, GLuint height, const char *windowName, GLuint glVer_Maj, GLuint glVer_Min):BaseWindow(width, height, windowName, glVer_Maj, glVer_Min) 
 {
-  createBuffer();
+  createBuffer1();
   createShader();  
 }
 

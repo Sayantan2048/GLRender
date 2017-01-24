@@ -4,6 +4,7 @@
 #include <iostream>
 #include "shaderUtil.h"
 #include "window.h"
+// Basic triangle drawing example.
 
 class RenderTri: public BaseWindow {
 private:
