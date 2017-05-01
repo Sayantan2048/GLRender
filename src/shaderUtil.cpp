@@ -70,6 +70,12 @@ void readFragmentShaderSource(const char *kernelFilename, char **kernelSource) {
   readSource(fullPath, kernelSource);
 }
 
+void readGeometryShaderSource(const char *kernelFilename, char **kernelSource) {
+  char fullPath[200];
+  sprintf(fullPath, "./src/shaders/geometry/%s", kernelFilename);
+  readSource(fullPath, kernelSource);
+}
+
 bool reportGlError(std::string message)
 {
   GLenum errorCheckValue = glGetError();
